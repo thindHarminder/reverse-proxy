@@ -8,3 +8,4 @@ SUBDOMAINS = "uselooop, stripe"
 WEBFLOW_SUBDOMAIN = "REPLACE_WITH_MAIN_SUB_DOMAIN"
 ROOT_FILES = "subfolder.json, sitemap.xml"
 R2PATH = "REPLACE_WITH_PATH_OF_R2_STOAGE"
+ 
