@@ -1,1 +1,1 @@
-# Your root files go in this folder
+# Your root files go into this folder
