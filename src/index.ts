@@ -1,12 +1,32 @@
-import { Hono } from 'hono';
-import type { Context } from './context';
-import { build_url, create_origin, has_trailing_slash, Matcher } from './helpers';
+import {
+  Hono
+} from 'hono';
+import type {
+  Context
+} from './context';
+import {
+  build_url,
+  create_origin,
+  has_trailing_slash,
+  Matcher
+} from './helpers';
 
-const app = new Hono<Context>();
+const app = new Hono < Context > ();
 
-app.get('*', async (c) => {
-  const { DOMAIN, WEBFLOW_SUBDOMAIN, SUBDOMAINS, R2PATH, ROOT_FILES } = c.env;
-  const { origin, hostname, pathname, search } = new URL(c.req.url);
+app.get('*', async (c): Promise<void | Response> => {
+  const {
+    DOMAIN,
+    WEBFLOW_SUBDOMAIN,
+    SUBDOMAINS,
+    R2PATH,
+    ROOT_FILES
+  } = c.env;
+  const {
+    origin,
+    hostname,
+    pathname,
+    search
+  } = new URL(c.req.url);
 
   const main_origin = create_origin(DOMAIN);
 
@@ -18,18 +38,18 @@ app.get('*', async (c) => {
   if (hostname !== DOMAIN) {
     // Subdomain is reverse proxied
     const match = matcher.subdomain_to_path(hostname);
-if (match) {
-	const redirect_url = build_url([main_origin, match, paths], search);
+    if (match) {
+      const redirect_url = build_url([main_origin, match, paths], search);
 
-	return c.redirect(redirect_url, 301);
-}
+      return c.redirect(redirect_url, 301);
+    }
 
-// Subdomain is the main Webflow project
-if (hostname.startsWith(WEBFLOW_SUBDOMAIN)) {
-	const redirect_url = build_url([main_origin, paths], search);
+    // Subdomain is the main Webflow project
+    if (hostname.startsWith(WEBFLOW_SUBDOMAIN)) {
+      const redirect_url = build_url([main_origin, paths], search);
 
-	return c.redirect(redirect_url, 301);
-}
+      return c.redirect(redirect_url, 301);
+    }
 
 
   }
@@ -44,19 +64,23 @@ if (hostname.startsWith(WEBFLOW_SUBDOMAIN)) {
   // Path matches reverse proxied subdomain
   const match = matcher.path_to_subdomain(paths);
   if (match) {
-    const { subdomain, wildcard_paths } = match;
+    const {
+      subdomain,
+      wildcard_paths
+    } = match;
 
     const target_origin = create_origin(`${subdomain}.${DOMAIN}`);
     const target_url = build_url([target_origin, wildcard_paths], search);
 
-    const response = await fetch(target_url);
+    let response = await fetch(target_url);
 
     // Handle redirected responses
     if (response.redirected && response.url) {
       return c.redirect(response.url, 301);
     }
 
-	// Modify HTML by adding subdomain prefix to relative href tags
+    
+    // Modify HTML by adding subdomain prefix to relative href tags
     const html = await response.text();
     let modifiedHtml;
     modifiedHtml = html.replace(/(href="\/)/g, `href="/${subdomain}/`);
@@ -64,14 +88,17 @@ if (hostname.startsWith(WEBFLOW_SUBDOMAIN)) {
     modifiedHtml = modifiedHtml.replace(expression, `href="/${subdomain}#`);
     response = new Response(modifiedHtml, response);
 
+  
     return response;
   }
 
-  // check all files
-  const filename: string = pathname.split('/').pop()!;
-  console.log(filename);
+  // Get file name from path
+  const filename: string = pathname.split('/').pop() !;
+
+  // Check if file is in root files
   const ROOT_FILES_ARRAY = ROOT_FILES.split(',');
-  console.log(ROOT_FILES_ARRAY);
+
+  // If file is in root files, fetch from the R2 
   if (ROOT_FILES_ARRAY.includes(filename)) {
     const target_url = build_url([R2PATH, filename], search);
     console.log(target_url);
