@@ -56,6 +56,14 @@ if (hostname.startsWith(WEBFLOW_SUBDOMAIN)) {
       return c.redirect(response.url, 301);
     }
 
+	// Modify HTML by adding subdomain prefix to relative href tags
+    const html = await response.text();
+    let modifiedHtml;
+    modifiedHtml = html.replace(/(href="\/)/g, `href="/${subdomain}/`);
+    const expression = new RegExp(`href="/${subdomain}/#`, 'g');
+    modifiedHtml = modifiedHtml.replace(expression, `href="/${subdomain}#`);
+    response = new Response(modifiedHtml, response);
+
     return response;
   }
 
