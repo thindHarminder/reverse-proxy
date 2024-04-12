@@ -2,11 +2,15 @@ name = "thind-proxy"
 compatibility_date = "2024-02-07"
 main ="src/index.ts"
 
+routes = [{ pattern = "TEST.DUMMY.COM*", zone_name = "DUMMY.COM" }]
+
+[[r2_buckets]]
+binding = 'ROOT' # <~ do not change, else proxy will break
+bucket_name = 'REPLACE_WITH_NAME_OF_R2_BUCKET'
+
 [vars]
 DOMAIN = "REPLACE_WITH_MAIN_DOMAIN"
 SUBDOMAINS = "uselooop, stripe"
 WEBFLOW_SUBDOMAIN = "REPLACE_WITH_MAIN_SUB_DOMAIN"
 ROOT_FILES = "subfolder.json, sitemap.xml"
-R2PATH = "REPLACE_WITH_PATH_OF_R2_BUCKET"
-R2BUCKET = "REPLACE_WITH_NAME_OF_R2_BUCKET"
  

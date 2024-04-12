@@ -18,8 +18,8 @@ app.get('*', async (c): Promise<void | Response> => {
     DOMAIN,
     WEBFLOW_SUBDOMAIN,
     SUBDOMAINS,
-    R2PATH,
-    ROOT_FILES
+    ROOT_FILES,
+    ROOT
   } = c.env;
   const {
     origin,
@@ -40,17 +40,13 @@ app.get('*', async (c): Promise<void | Response> => {
     const match = matcher.subdomain_to_path(hostname);
     if (match) {
       const redirect_url = build_url([main_origin, match, paths], search);
-
+      console.log('redirecting from subdomain to path');
       return c.redirect(redirect_url, 301);
-    }
-
-    // Subdomain is the main Webflow project
-    if (hostname.startsWith(WEBFLOW_SUBDOMAIN)) {
+    } else if (hostname.startsWith(WEBFLOW_SUBDOMAIN)) {
       const redirect_url = build_url([main_origin, paths], search);
-
+      console.log('redirecting from main webflow subdomain to path');
       return c.redirect(redirect_url, 301);
-    }
-
+    } 
 
   }
 
@@ -98,18 +94,23 @@ app.get('*', async (c): Promise<void | Response> => {
   // Check if file is in root files
   const ROOT_FILES_ARRAY = ROOT_FILES.split(',');
 
-  // If file is in root files, fetch from the R2 
+  // Fetch from R2 bucket
   if (ROOT_FILES_ARRAY.includes(filename)) {
-    const target_url = build_url([R2PATH, filename], search);
-    console.log(target_url);
-    const response = await fetch(`https://${target_url}`);
-    console.log(response);
-    // Handle redirected responses
-    if (response.redirected && response.url) {
-      return c.redirect(response.url, 301);
+    const object = await ROOT.get(filename);
+
+    if (object === null) {
+      return new Response('Object Not Found', {
+        status: 404
+      });
     }
 
-    return response;
+    const headers = new Headers();
+    object.writeHttpMetadata(headers);
+    headers.set('etag', object.httpEtag);
+
+    return new Response(object.body, {
+      headers
+    });
   }
 
   // If no subdomains are matched, fetch from the main Webflow project

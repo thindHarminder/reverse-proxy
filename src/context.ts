@@ -2,8 +2,8 @@ type Env = {
   DOMAIN: string;
   WEBFLOW_SUBDOMAIN: string;
   SUBDOMAINS: string;
-  R2PATH: string;
   ROOT_FILES: string;
+  ROOT: R2Bucket;
 };
 
 export type Context = {
