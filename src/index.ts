@@ -18,7 +18,6 @@ app.get('*', async (c): Promise<void | Response> => {
     DOMAIN,
     WEBFLOW_SUBDOMAIN,
     SUBDOMAINS,
-    ROOT_FILES,
     ROOT
   } = c.env;
   const {
@@ -89,25 +88,17 @@ app.get('*', async (c): Promise<void | Response> => {
   }
 
   // Get file name from path
+  // Get file name from path
   const filename: string = pathname.split('/').pop() !;
 
-  // Check if file is in root files
-  const ROOT_FILES_ARRAY = ROOT_FILES.split(',');
+  //Get file from R2
+  const object = await ROOT.get(filename);
 
-  // Fetch from R2 bucket
-  if (ROOT_FILES_ARRAY.includes(filename)) {
-    const object = await ROOT.get(filename);
-
-    if (object === null) {
-      return new Response('Object Not Found', {
-        status: 404
-      });
-    }
-
+  if (object !== null) {
     const headers = new Headers();
     object.writeHttpMetadata(headers);
     headers.set('etag', object.httpEtag);
-
+  
     return new Response(object.body, {
       headers
     });

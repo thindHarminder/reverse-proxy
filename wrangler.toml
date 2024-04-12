@@ -12,5 +12,4 @@ bucket_name = 'REPLACE_WITH_NAME_OF_R2_BUCKET'
 DOMAIN = "REPLACE_WITH_MAIN_DOMAIN"
 SUBDOMAINS = "uselooop, stripe"
 WEBFLOW_SUBDOMAIN = "REPLACE_WITH_MAIN_SUB_DOMAIN"
-ROOT_FILES = "subfolder.json, sitemap.xml"
  
