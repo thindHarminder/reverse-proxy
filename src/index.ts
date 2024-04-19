@@ -33,6 +33,13 @@ app.get('*', async (c): Promise<void | Response> => {
 
   const matcher = new Matcher(SUBDOMAINS);
 
+ // Handle redirect from www to main domain
+  if (hostname === `www.${DOMAIN}`) {
+    const redirect_url = build_url([main_origin, paths], search);
+
+    return c.redirect(redirect_url, 301)
+  }
+
   // Handle when hostname has a subdomain
   if (hostname !== DOMAIN) {
     // Subdomain is reverse proxied
