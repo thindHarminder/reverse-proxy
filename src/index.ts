@@ -95,7 +95,6 @@ app.get('*', async (c): Promise<void | Response> => {
   }
 
   // Get file name from path
-  // Get file name from path
   const filename: string = pathname.split('/').pop() !;
 
   //Get file from R2
