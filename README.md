@@ -33,9 +33,12 @@ This will publish the Cloudflare worker and configure all routes and custom doma
 ## Uploading Root Files
 These are files that you can access from the root of your domain. 
 
-## 1. Create a files
-Create any file in the root folder of this repo and save it with a uniqe name
+### 1. Create a files
+Create any file in the root folder of this repo and save it with a unique name
 
-## Upload file to root storage
-This command will upload the file sected to linked Cloudflare R2 storage
+### Upload file to root storage
+This command will upload the selected file to the linked Cloudflare R2 storage
 ``` thind proxy --upload ```
+
+### Access the file
+You should be now able to access the file at [YOUR_ROOT_DOMAIN]/[FILENAME]
