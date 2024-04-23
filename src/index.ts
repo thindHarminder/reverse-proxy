@@ -98,20 +98,22 @@ app.get('*', async (c): Promise<void | Response> => {
 
     
     // Modify HTML by adding subdomain prefix to relative href tags
-    const html = await response.text();
-    let modifiedHtml;
-    if (!html.includes(`href="/${subdomain}/`)) {
-      modifiedHtml = html.replace(/(href="\/)/g, `href="/${subdomain}/`);
+    if (response.headers.get('content-type')?.includes('text/html')) {
+      const html = await response.text();
+      let modifiedHtml;
+      if (!html.includes(`href="/${subdomain}/`)) {
+        modifiedHtml = html.replace(/(href="\/)/g, `href="/${subdomain}/`);
+        const expression = new RegExp(`href="/${subdomain}/#`, 'g');
+        modifiedHtml = modifiedHtml.replace(expression, `href="/${subdomain}#`);
+      } else {
+        modifiedHtml = html;
+      }
       const expression = new RegExp(`href="/${subdomain}/#`, 'g');
       modifiedHtml = modifiedHtml.replace(expression, `href="/${subdomain}#`);
-    } else {
-      modifiedHtml = html;
-    }
-    const expression = new RegExp(`href="/${subdomain}/#`, 'g');
-    modifiedHtml = modifiedHtml.replace(expression, `href="/${subdomain}#`);
-    response = new Response(modifiedHtml, response);
 
-  
+
+      response = new Response(modifiedHtml, response);
+    }
     return response;
   }
 
