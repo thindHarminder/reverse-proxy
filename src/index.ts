@@ -78,14 +78,35 @@ app.get('*', async (c): Promise<void | Response> => {
 
     // Handle redirected responses
     if (response.redirected && response.url) {
-      return c.redirect(response.url, 301);
+     
+      // Compare paths with paths from the redirected URL
+      const {
+        origin,
+        hostname,
+        pathname,
+        search
+      } = new URL(response.url);
+      const actualpaths = paths.slice(-2);
+      const redirectedPaths = pathname.split('/').filter(Boolean).slice(-2);
+     
+      if (JSON.stringify(actualpaths) !== JSON.stringify(redirectedPaths)) {
+        return c.redirect(response.url, 301);
+      } else {
+        response = await fetch(response.url);
+      }
     }
 
     
     // Modify HTML by adding subdomain prefix to relative href tags
     const html = await response.text();
     let modifiedHtml;
-    modifiedHtml = html.replace(/(href="\/)/g, `href="/${subdomain}/`);
+    if (!html.includes(`href="/${subdomain}/`)) {
+      modifiedHtml = html.replace(/(href="\/)/g, `href="/${subdomain}/`);
+      const expression = new RegExp(`href="/${subdomain}/#`, 'g');
+      modifiedHtml = modifiedHtml.replace(expression, `href="/${subdomain}#`);
+    } else {
+      modifiedHtml = html;
+    }
     const expression = new RegExp(`href="/${subdomain}/#`, 'g');
     modifiedHtml = modifiedHtml.replace(expression, `href="/${subdomain}#`);
     response = new Response(modifiedHtml, response);
