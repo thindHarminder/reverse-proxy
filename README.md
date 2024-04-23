@@ -1,6 +1,8 @@
+Read full docs here - [Docs](https://thind.dev/docs/category/reverse-proxy)
+
 # Reverse Proxy
-by [thind.dev](https://thind.dev) </br>
-based on the finsweet reverse proxy
+Built by [thind.dev](https://thind.dev) </br>
+based on the finsweet reverse proxy 
 
 ## Setup Proxy
 Follow these steps to setup the proxy.
