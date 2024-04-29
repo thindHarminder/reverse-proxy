@@ -100,20 +100,36 @@ app.get('*', async (c): Promise<void | Response> => {
     // Modify HTML by adding subdomain prefix to relative href tags
     if (response.headers.get('content-type')?.includes('text/html')) {
       const html = await response.text();
-      let modifiedHtml;
-      if (!html.includes(`href="/${subdomain}/`)) {
-        modifiedHtml = html.replace(/(href="\/)/g, `href="/${subdomain}/`);
-        const expression = new RegExp(`href="/${subdomain}/#`, 'g');
-        modifiedHtml = modifiedHtml.replace(expression, `href="/${subdomain}#`);
-      } else {
-        modifiedHtml = html;
-      }
-      const expression = new RegExp(`href="/${subdomain}/#`, 'g');
-      modifiedHtml = modifiedHtml.replace(expression, `href="/${subdomain}#`);
+      let modifiedHtml = html;
 
+      // replace root "/" href with subdomain
+      modifiedHtml = modifiedHtml.replace(/href="\/["]/g, `href="/${subdomain}/"`);
+      modifiedHtml = modifiedHtml.replace(/href='\/[']/g, `href='/${subdomain}/'`);
+
+      // replace href links without subdomain with /subdomain/
+      modifiedHtml.match(/href='\/[^']+/g)?.forEach((href) => {
+        if (!href.includes(`href='/${subdomain}/`)) {
+          const link  = href.replace(/(href='\/)/g, '');
+          let expression = new RegExp(`${href}`, 'g'); 
+          modifiedHtml = modifiedHtml.replace(expression, `href='/${subdomain}/${link}`);
+          expression = new RegExp(`href='/${subdomain}/#`, 'g');
+          modifiedHtml = modifiedHtml.replace(expression, `href='/${subdomain}#`);
+        }
+      });
+
+      modifiedHtml.match(/href="\/[^"]+/g)?.forEach((href) => {
+        if (!href.includes(`href="/${subdomain}/`)) {
+          const link  = href.replace(/(href="\/)/g, '');
+          let expression = new RegExp(`${href}`, 'g'); 
+          modifiedHtml = modifiedHtml.replace(expression, `href="/${subdomain}/${link}`);
+          expression = new RegExp(`href="/${subdomain}/#`, 'g');
+          modifiedHtml = modifiedHtml.replace(expression, `href="/${subdomain}#`);
+        }
+      });
 
       response = new Response(modifiedHtml, response);
     }
+    
     return response;
   }
 
